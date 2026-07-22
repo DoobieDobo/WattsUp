@@ -6,6 +6,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Watt's Up?</title>
+
+  <!-- Umami Analytics Script -->
+  <script 
+    defer 
+    src="https://cloud.umami.is/script.js" 
+    data-website-id="YOUR-WEBSITE-ID-HERE">
+  </script>
+
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Fraunces:wght@700;900&amp;display=swap" rel="stylesheet">
@@ -774,6 +782,14 @@ const appliances = [
             }).join('');
 
             document.getElementById('end-screen').classList.remove('hidden');
+
+            // --- UMAMI COMPLETION TRACKING EVENT ---
+            if (window.umami) {
+                umami.track('game_completed', { 
+                    total_players: players.length,
+                    winning_score: sorted[0]?.score || 0
+                });
+            }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
