@@ -576,14 +576,21 @@ const appliances = [
         let userRate = 15.00;
         let userCurrency = '₱';
 
-        // --- Helper function to safely send events to Umami with string values ---
+        // --- Helper function to safely send events to Umami with string values & load safety ---
         function trackUmamiEvent(eventName, properties = {}) {
+            const stringifiedProperties = {};
+            for (const [key, value] of Object.entries(properties)) {
+                stringifiedProperties[key] = String(value);
+            }
+
             if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
-                const stringifiedProperties = {};
-                for (const [key, value] of Object.entries(properties)) {
-                    stringifiedProperties[key] = String(value);
-                }
                 window.umami.track(eventName, stringifiedProperties);
+            } else {
+                window.addEventListener('load', () => {
+                    if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
+                        window.umami.track(eventName, stringifiedProperties);
+                    }
+                }, { once: true });
             }
         }
 
