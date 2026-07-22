@@ -576,6 +576,13 @@ const appliances = [
         let userRate = 15.00;
         let userCurrency = '₱';
 
+        // --- Helper function to safely send events to Umami ---
+        function trackUmamiEvent(eventName, properties = {}) {
+            if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
+                window.umami.track(eventName, properties);
+            }
+        }
+
         const playerCountInput = document.getElementById('player-count');
         const playerNamesDiv = document.getElementById('player-names');
 
@@ -607,7 +614,13 @@ const appliances = [
             totalRoundsPool = appliances.length;
             remaining = [...Array(totalRoundsPool).keys()];
             roundNum = 0;
-            
+
+            // --- UMAMI START TRACKING EVENT ---
+            trackUmamiEvent('game_started', {
+                player_count: players.length,
+                rate: userRate
+            });
+
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('gameplay-layout').classList.remove('hidden');
             document.getElementById('gameplay-layout').classList.add('flex');
@@ -693,6 +706,18 @@ const appliances = [
                 const finalPts = Math.max(0, r.calculatedRank === 0 ? pts + 2 : pts);
                 r.roundPoints = finalPts;
                 scores[r.idx] += finalPts;
+            });
+
+            // --- UMAMI QUESTION/ROUND TRACKING EVENT (Option A) ---
+            const closestGuess = results[0]?.guess || 0;
+            const avgGuess = Math.round(guesses.reduce((a, b) => a + b, 0) / guesses.length);
+
+            trackUmamiEvent('question_answered', {
+                round_number: roundNum,
+                appliance_name: currentAppliance.name,
+                actual_watts: actual,
+                closest_guess: closestGuess,
+                average_guess: avgGuess
             });
 
             const resImg = document.getElementById('result-img');
@@ -784,12 +809,11 @@ const appliances = [
             document.getElementById('end-screen').classList.remove('hidden');
 
             // --- UMAMI COMPLETION TRACKING EVENT ---
-            if (window.umami) {
-                umami.track('game_completed', { 
-                    total_players: players.length,
-                    winning_score: sorted[0]?.score || 0
-                });
-            }
+            trackUmamiEvent('game_completed', { 
+                total_players: players.length,
+                rounds_completed: roundNum,
+                winning_score: sorted[0]?.score || 0
+            });
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
