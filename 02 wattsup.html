@@ -576,10 +576,14 @@ const appliances = [
         let userRate = 15.00;
         let userCurrency = '₱';
 
-        // --- Helper function to safely send events to Umami ---
+        // --- Helper function to safely send events to Umami with string values ---
         function trackUmamiEvent(eventName, properties = {}) {
             if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
-                window.umami.track(eventName, properties);
+                const stringifiedProperties = {};
+                for (const [key, value] of Object.entries(properties)) {
+                    stringifiedProperties[key] = String(value);
+                }
+                window.umami.track(eventName, stringifiedProperties);
             }
         }
 
@@ -688,7 +692,6 @@ const appliances = [
             const guesses = players.map((_, i) => parseInt(document.getElementById(`guess-${i}`).value) || 0);
             const actual = currentAppliance.watts;
             const diffs = guesses.map(g => Math.abs(g - actual));
-            const maxDiff = Math.max(...diffs, 1);
 
             const results = players.map((p, i) => ({ name: p, guess: guesses[i], diff: diffs[i], idx: i }));
             results.sort((a, b) => a.diff - b.diff);
@@ -708,7 +711,7 @@ const appliances = [
                 scores[r.idx] += finalPts;
             });
 
-            // --- UMAMI QUESTION/ROUND TRACKING EVENT (Option A) ---
+            // --- UMAMI QUESTION/ROUND TRACKING EVENT ---
             const closestGuess = results[0]?.guess || 0;
             const avgGuess = Math.round(guesses.reduce((a, b) => a + b, 0) / guesses.length);
 
