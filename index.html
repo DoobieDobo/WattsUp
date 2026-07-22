@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watt's Up?</title>
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="ac1739f4-05b3-4c70-97a5-1534053882cc"></script>
+
+    <!-- Umami Analytics Script (Matching Proxy Setup) -->
+    <script 
+      defer 
+      src="https://morning-union-dcf8.dobostorage.workers.dev/telemetry/script.js" 
+      data-website-id="ac1739f4-05b3-4c70-97a5-1534053882cc"
+      data-host-url="https://morning-union-dcf8.dobostorage.workers.dev/telemetry">
+    </script>
+
     <style>
         body {
             margin: 0;
@@ -205,9 +213,7 @@
             transform: translate(-50%, 50%) scale(0.98);
         }
 
-        /* ==========================================
-           MOBILE OPTIMIZATIONS
-           ========================================== */
+        /* Mobile Optimizations */
         @media (max-width: 768px) {
             .game-container {
                 width: 100vw;
@@ -303,6 +309,13 @@
     </div>
 
     <script>
+        // Safe Umami tracking helper
+        function trackUmamiEvent(eventName, properties = {}) {
+            if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
+                window.umami.track(eventName, properties);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const titleScreen = document.getElementById('title-screen');
             const rulesScreen = document.getElementById('rules-screen');
@@ -312,6 +325,7 @@
             const btnBack = document.getElementById('btn-back');
 
             btnHowTo.addEventListener('click', () => {
+                trackUmamiEvent('view_how_to_play');
                 titleScreen.classList.add('hidden');
                 rulesScreen.classList.remove('hidden');
             });
@@ -322,7 +336,12 @@
             });
 
             btnEnter.addEventListener('click', () => {
-                window.location.href = "02 wattsup.html";
+                trackUmamiEvent('click_enter_game');
+                
+                // Slight delay ensures the custom event sends before page redirect
+                setTimeout(() => {
+                    window.location.href = "02 wattsup.html";
+                }, 150);
             });
         });
     </script>
