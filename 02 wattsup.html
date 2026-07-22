@@ -576,7 +576,7 @@ const appliances = [
         let userRate = 15.00;
         let userCurrency = '₱';
 
-        // --- Helper function to safely send events to Umami with string values & load safety ---
+        // --- Integrated Solution 1: Safe Umami Tracking Handler ---
         function trackUmamiEvent(eventName, properties = {}) {
             const stringifiedProperties = {};
             for (const [key, value] of Object.entries(properties)) {
@@ -585,12 +585,14 @@ const appliances = [
 
             if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
                 window.umami.track(eventName, stringifiedProperties);
-            } else {
+            } else if (document.readyState !== 'complete') {
                 window.addEventListener('load', () => {
                     if (typeof window.umami !== 'undefined' && typeof window.umami.track === 'function') {
                         window.umami.track(eventName, stringifiedProperties);
                     }
                 }, { once: true });
+            } else {
+                console.warn('Umami tracking unavailable at invocation.');
             }
         }
 
